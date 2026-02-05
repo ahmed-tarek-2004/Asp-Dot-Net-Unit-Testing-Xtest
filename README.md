@@ -1,4 +1,7 @@
-## ازيك ياصديقي عامل اي جاهز نبدأ سوا في ال Topic البسيط اللذيذ دا ؟ يلا بينا (●'◡'●)
+## **Before Getting Started, Be aware that The Repo is being updated with some notes over time**
+
+
+### ازيك ياصديقي عامل اي جاهز نبدأ سوا في ال Topic البسيط اللذيذ دا ؟ يلا بينا (●'◡'●)
 
 #### اولا يعني ايه Unit Testing ?
 
