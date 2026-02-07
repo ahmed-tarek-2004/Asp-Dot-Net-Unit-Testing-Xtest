@@ -1,7 +1,6 @@
 ## **Before Getting Started, Be aware that The Repo is being updated with some notes over time**
 
-
-### ازيك ياصديقي عامل اي جاهز نبدأ سوا في ال Topic البسيط اللذيذ دا ؟ يلا بينا (●'◡'●)
+## ازيك ياصديقي عامل اي جاهز نبدأ سوا في ال Topic البسيط اللذيذ دا ؟ يلا بينا (●'◡'●)
 
 #### اولا يعني ايه Unit Testing ?
 
@@ -697,14 +696,14 @@ public class CarService : ICarServices
 
     public bool RemoveCar(int Id)
     {
-        if (Id == 0) return false;
-        if (_cars.Any(i => i.Id == Id))
-        {
-            var car = _cars.FirstOrDefault(i => i.Id == Id);
-            _cars.Remove(car!);
-            return false;
-        }
-        return true;
+       
+       if (id == 0) return false;
+
+       var car = _cars.FirstOrDefault(i => i.Id == id);
+       if (car == null) return false;
+
+       _cars.Remove(car);
+       return true;
     }
 }
 ```
@@ -1898,7 +1897,7 @@ public class UserTests
 ##
 
 
-- ## واتفكر دايما ان ربنا كريم اوي وعطاياها لاتحصي.. ماعليك غير انك تسعي وتكمل سعي وتحمد ربنا علي نعمه وتتوكل عليه ولازم تتيقن انك بتتوكل علي ربنا وبس كدا ياصديقي ربنا يوفقك ويعينك يارب 
+- ## واتفكر دايما ان ربنا كريم اوي وعطاياها لاتحصي.. ماعليك غير انك تسعي وتكمل سعي وتحمد ربنا علي نعمه وتتوكل عليه ولازم تتيقن انك بتتوكل علي ربنا وبس كدا ياصديقي ربنا يوفقك ويعينك يارب والي لقاء اخر ان شاء الله 
 
 
 ###  Connect with me :- 
