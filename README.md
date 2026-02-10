@@ -1448,6 +1448,79 @@ public class StudentServiceTests
 بص علي الريبو دا [Gharbawy1/AuthTemplate](https://github.com/Gharbawy1/AuthTemplate) وخدلك بصة في جزء الTest وعيش بقا 
  
 ---
+## InMemoryDataBase
+
+- احيانا بيبقي لازم نخترف كود الDataBase اللي هو `(ApplicationDbContext)` فاحنا مينفعش نباصيه علي طول عشان مش نبوظ الداتا بيز بتاعتنا وفي نفس الوقت ال mock مش حل فعال لانك عاوز تستخدم الداتا بيز بجد طب اي الحل ؟
+
+- حل من الحلول اننا نخلي الداتا بيز بتاعتنا في الميموري ودا اللي اسمه `InMemoryDataBase` وبنتعامل عادي اكننا بسنتخدم ال `ApplicationDbContext` طب بنطبقه ازاي؟ يلا بينا 
+
+```csharp
+ internal class InMemoryDatabase:Infrastructure.Persistence.ApplicationDbContext
+ {
+     public InMemoryDatabase(DbContextOptions<ApplicationDbContext> options) : base(options)
+     {
+     }
+     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+     {
+         //base.OnConfiguring(optionsBuilder);
+         optionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());
+     }
+
+     public override void Dispose()
+     {
+         Database.EnsureDeleted();
+         base.Dispose();
+     }
+ }
+```
+
+- احنا ورثنا من `ApplicationDbContext` عشان نتعامل عادي اكننا بنتعامل معاه وكمان نخلي الداتا بيز بتاعتنا مكانها في الميموري عن طريق ` protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)` وحددنا في ال 
+`optionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());`
+وخلناه `Guid` عشان نتجنب عشان ان الداتا بيز تبقي shared بين اكتر من method عشان محدش يبوظ فيها وبكدا منعنا التداخل بين الاختبارات و كل test بقا مستقل 
+
+- - ال `Dispose()` بيضمن حذف الداتابيز الوهمية بعد انتهاء الاختبار → حافظ على نظافة الذاكرة. 
+
+- تعالي نشوف ازاي بنستخدمها 
+
+```csharp
+ public class InMemoryTesting
+ {
+     private readonly AuthService _authService;
+     private readonly Mock<ITokenService> _tokenService;
+     private readonly Mock<ILogger<AuthService>> _logger;
+     private readonly Mock<IEmailService> _emailService;
+     private readonly Mock<IImageUploading> _imageUploading;
+     private readonly InMemoryDatabase _context;
+     private readonly Mock<UserManager<User>> _userManager;
+     private readonly Mock<IOTPService> _otpService;
+     private readonly ResponseHandler _responseHandler;
+
+     public InMemoryTesting()
+     {
+     
+     // هنا طريقة الاستخدام 
+         var options = new DbContextOptionsBuilder<ApplicationDbContext>().Options;
+         _context = new InMemoryDatabase(options);
+         
+         //--------------------------------------------
+         
+         
+         
+         _logger = new();
+         _emailService = new();
+         _imageUploading = new();
+         _otpService = new();
+         _tokenService = new();
+         _responseHandler = new();
+         var setUp = new Mock<IUserStore<User>>();
+         _userManager = new Mock<UserManager<User>>(setUp.Object, null, null, null, null, null, null, null, null);
+
+         _authService = new(_tokenService.Object, _logger.Object, _context, _userManager.Object, _imageUploading.Object, _responseHandler, _otpService.Object, _emailService.Object);
+
+     }
+
+
+---
 ## هههححححححح خدلك بريك كدا وهاتلك شكولاتاية جميلة وتعالي تاني عشان اللي جاي محتاجك فايق فيه اوي عشان هنستمتع مع بعض
 
 ---
