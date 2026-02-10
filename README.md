@@ -1463,7 +1463,10 @@ public class StudentServiceTests
      protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
      {
          //base.OnConfiguring(optionsBuilder);
-         optionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());
+           optionsBuilder
+          .UseInMemoryDatabase(Guid.NewGuid().ToString())
+          // حطينا دي عشان نتجنب اي transaction 
+          .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
      }
 
      public override void Dispose()
@@ -1477,6 +1480,8 @@ public class StudentServiceTests
 - احنا ورثنا من `ApplicationDbContext` عشان نتعامل عادي اكننا بنتعامل معاه وكمان نخلي الداتا بيز بتاعتنا مكانها في الميموري عن طريق ` protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)` وحددنا في ال 
 `optionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());`
 وخلناه `Guid` عشان نتجنب عشان ان الداتا بيز تبقي shared بين اكتر من method عشان محدش يبوظ فيها وبكدا منعنا التداخل بين الاختبارات و كل test بقا مستقل 
+
+- انما `ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));` بتخليني اتجنب اي Transaction عشان ال InMemory مش فيه Transaction 
 
 - - ال `Dispose()` بيضمن حذف الداتابيز الوهمية بعد انتهاء الاختبار → حافظ على نظافة الذاكرة. 
 
@@ -1518,8 +1523,47 @@ public class StudentServiceTests
          _authService = new(_tokenService.Object, _logger.Object, _context, _userManager.Object, _imageUploading.Object, _responseHandler, _otpService.Object, _emailService.Object);
 
      }
+
+
 ```
 
+##### طب بنتعامل معاها ازاي يابوحميد؟ اكنك بتتعامل مع الداتا بيز بتاعتك بطريقة طبيعية تعالي نشوف مثال يوضح اكتر 
+
+```csharp
+ [Fact]
+ public async Task RegisterAsStudent_CheckingEmailOrPhoneIsExisting_ReturnsTrue()
+ {
+
+     var user = new User
+     {
+         Id = Guid.NewGuid().ToString(),
+         Email = "ahmed@gmail.com",
+         Country="any",
+         Gender=Domain.Enums.Gender.male,
+         PhoneNumber="99999999"
+        
+     };
+
+
+     _context.Users.Add(user);
+     await _context.SaveChangesAsync();
+     
+     
+     var registerRequest = new StudentRegisterRequest("ahmed@gmail.com","123456789",default,default,default,default,default,default,default,default);
+   
+     
+     var result = await _authService.RegisterAsStudentAsync(registerRequest);
+
+     result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+ }
+
+```
+
+
+- هنا انا اول حاجة عملتها `User` جديد من عندي وبعدها ضفته في ال Database اللي هي InMemory اللي عملناها الكود اللي فات وبعد كدا ناديت ال `Service` بتاعتي بطريقة طبيعية بعد ما عملت ال Request بتاعها  وبس كدا الباقي معروف 
+
+-  خد بالك هنا اني مش بعمل Test علي كل ال register انا بعمل Test لو لقا الايميل موجود عشان اوريك استخدامنا لل InMemory بيبقي ازاي 
 ---
 ## هههححححححح خدلك بريك كدا وهاتلك شكولاتاية جميلة وتعالي تاني عشان اللي جاي محتاجك فايق فيه اوي عشان هنستمتع مع بعض
 
